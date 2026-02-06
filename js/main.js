@@ -27,7 +27,7 @@ const CFG = {
     nunSearchTimeMin: 10, nunSearchTimeMax: 18,
     nunCooldownDuration: 6,
     nunMaxChaseTime: 45,
-    flashRange: 18, maxBattery: 100, batteryDrain: 0.083,
+    flashRange: 28, maxBattery: 100, batteryDrain: 0.083,
     fogColor: 0x0c0c14, fogDensity: 0.018,
     cameraFar: 38,
     doorSlamLoudness: 15, doorSlowLoudness: 3,
@@ -1560,7 +1560,7 @@ class Game {
         const startPos = gridToWorld(25, 25);
         this.camera.position.set(startPos.x, CFG.playerH, startPos.z);
 
-        this.flashlight = new THREE.SpotLight(0xffffcc, 5, CFG.flashRange, Math.PI / 5, 0.4, 0.5);
+        this.flashlight = new THREE.SpotLight(0xfff8e0, 12, CFG.flashRange, Math.PI / 4, 0.35, 0.3);
         this.flashlight.visible = false;
         this.camera.add(this.flashlight);
         this.flashlight.position.set(0, 0, 0);
