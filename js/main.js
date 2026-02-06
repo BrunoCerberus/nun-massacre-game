@@ -446,7 +446,7 @@ class LevelBuilder {
                 const desk = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.7, 0.8), fMat); desk.position.set(x, 0.35, z); this.scene.add(desk);
             }
         }
-        { const { x, z } = gridToWorld(13, 38); this.scene.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.0, 1.2), aMat), { position: new THREE.Vector3(x, 0.5, z) }));
+        { const { x, z } = gridToWorld(13, 38); const altar = new THREE.Mesh(new THREE.BoxGeometry(2.5, 1.0, 1.2), aMat); altar.position.set(x, 0.5, z); this.scene.add(altar);
           const cr1 = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.2, 0.1), new THREE.MeshLambertMaterial({ color: 0x8a7a5a })); cr1.position.set(x, 1.8, z); this.scene.add(cr1);
           const cr2 = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.1, 0.1), new THREE.MeshLambertMaterial({ color: 0x8a7a5a })); cr2.position.set(x, 2.1, z); this.scene.add(cr2); }
         for (let row = 0; row < 3; row++) { const { x, z } = gridToWorld(13, 41 + row); const pew = new THREE.Mesh(new THREE.BoxGeometry(3, 0.6, 0.5), fMat); pew.position.set(x, 0.3, z); this.scene.add(pew); }
