@@ -16,7 +16,7 @@ const CFG = {
     playerH: 1.6, playerR: 0.35,
     walkSpd: 2.2, sprintSpd: 3.6, crouchSpd: 1.2,
     crouchH: 1.0,
-    maxStamina: 100, staminaDrain: 9, staminaRegen: 12, crouchStaminaRegen: 20,
+    maxStamina: 100, staminaDrain: 4.5, staminaRegen: 12, crouchStaminaRegen: 20,
     maxHealth: 3,
     nunPatrolSpd: 1.8, nunInvestigateSpd: 2.6, nunChaseSpd: 3.2, nunSearchSpd: 2.4,
     nunSightRange: 14, nunSightAngle: 70 * Math.PI / 180,
@@ -1400,13 +1400,23 @@ class AudioManager {
     playStab() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator(); osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
-        const gain = this.ctx.createGain(); gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
-        osc.connect(gain); gain.connect(this.masterGain); osc.start(now); osc.stop(now + 0.2);
-        const thud = this.ctx.createOscillator(); thud.type = 'sine'; thud.frequency.value = 80;
-        const tGain = this.ctx.createGain(); tGain.gain.setValueAtTime(0.12, now + 0.05); tGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-        thud.connect(tGain); tGain.connect(this.masterGain); thud.start(now + 0.05); thud.stop(now + 0.25);
+        // Knife impact: filtered noise burst (wet thud) + low thump
+        const dur = 0.15;
+        const bufLen = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+        const src = this.ctx.createBufferSource(); src.buffer = buf;
+        const lp = this.ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 500; lp.Q.value = 1;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        src.connect(lp); lp.connect(gain); gain.connect(this.masterGain);
+        src.start(now); src.stop(now + dur);
+        // Deep body impact thump
+        const thud = this.ctx.createOscillator(); thud.type = 'sine'; thud.frequency.value = 50;
+        const tGain = this.ctx.createGain();
+        tGain.gain.setValueAtTime(0.18, now); tGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        thud.connect(tGain); tGain.connect(this.masterGain); thud.start(now); thud.stop(now + 0.12);
     }
 
     playHurt() {
@@ -1437,6 +1447,46 @@ class AudioManager {
         gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
         src.connect(bp); bp.connect(gain);
         // Second formant path
+        const src2 = this.ctx.createBufferSource(); src2.buffer = buf;
+        src2.connect(bp2); bp2.connect(g2); g2.connect(gain);
+        gain.connect(this.masterGain);
+        src.start(now); src.stop(now + dur);
+        src2.start(now); src2.stop(now + dur);
+    }
+
+    playNunVocal(distance) {
+        if (!this.ctx || distance > 20) return;
+        const now = this.ctx.currentTime;
+        const vol = Math.max(0.02, 0.2 * (1 - distance / 20));
+        const dur = 0.8 + Math.random() * 0.6;
+        // Guttural moan/growl: noise through narrow bandpass + pitch modulation
+        const bufLen = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+        const src = this.ctx.createBufferSource(); src.buffer = buf;
+        // Vocal formant: tight bandpass for eerie moan
+        const bp1 = this.ctx.createBiquadFilter(); bp1.type = 'bandpass';
+        const baseFreq = 180 + Math.random() * 80;
+        bp1.frequency.setValueAtTime(baseFreq, now);
+        bp1.frequency.linearRampToValueAtTime(baseFreq * 1.5, now + dur * 0.3);
+        bp1.frequency.linearRampToValueAtTime(baseFreq * 0.7, now + dur);
+        bp1.Q.value = 8;
+        // Second formant (higher, thinner)
+        const bp2 = this.ctx.createBiquadFilter(); bp2.type = 'bandpass';
+        bp2.frequency.value = 600 + Math.random() * 200; bp2.Q.value = 6;
+        const g2 = this.ctx.createGain(); g2.gain.value = 0.15;
+        // Tremolo for unnatural warble
+        const trem = this.ctx.createOscillator(); trem.frequency.value = 5 + Math.random() * 8;
+        const tremG = this.ctx.createGain(); tremG.gain.value = vol * 0.4;
+        // Envelope
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(vol, now + 0.05);
+        gain.gain.setValueAtTime(vol * 0.8, now + dur * 0.5);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        trem.connect(tremG); tremG.connect(gain.gain); trem.start(now); trem.stop(now + dur);
+        src.connect(bp1); bp1.connect(gain);
         const src2 = this.ctx.createBufferSource(); src2.buffer = buf;
         src2.connect(bp2); bp2.connect(g2); g2.connect(gain);
         gain.connect(this.masterGain);
@@ -2081,6 +2131,16 @@ class Game {
         if (nunMoving && this.nunFootstepTimer <= 0) {
             this.audio.playNunFootstep(nunDist);
             this.nunFootstepTimer = this.nun.state === NUN_STATE.CHASE ? 0.3 : 0.5;
+        }
+
+        // Nun vocalization during chase
+        if (!this.nunVocalTimer) this.nunVocalTimer = 2;
+        this.nunVocalTimer -= dt;
+        if (this.nun.state === NUN_STATE.CHASE && this.nunVocalTimer <= 0) {
+            this.audio.playNunVocal(nunDist);
+            this.nunVocalTimer = 2.5 + Math.random() * 3; // every 2.5-5.5 seconds
+        } else if (this.nun.state !== NUN_STATE.CHASE) {
+            this.nunVocalTimer = 1; // ready to vocalize quickly when chase starts
         }
 
         // Tension-based audio
