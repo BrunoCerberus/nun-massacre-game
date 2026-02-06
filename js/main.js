@@ -16,7 +16,7 @@ const CFG = {
     playerH: 1.6, playerR: 0.35,
     walkSpd: 2.2, sprintSpd: 3.6, crouchSpd: 1.2,
     crouchH: 1.0,
-    maxStamina: 100, staminaDrain: 28, staminaRegen: 12, crouchStaminaRegen: 20,
+    maxStamina: 100, staminaDrain: 9, staminaRegen: 12, crouchStaminaRegen: 20,
     maxHealth: 3,
     nunPatrolSpd: 1.8, nunInvestigateSpd: 2.2, nunChaseSpd: 3.9, nunSearchSpd: 2.4,
     nunSightRange: 14, nunSightAngle: 70 * Math.PI / 180,
@@ -27,8 +27,8 @@ const CFG = {
     nunSearchTimeMin: 10, nunSearchTimeMax: 18,
     nunCooldownDuration: 6,
     nunMaxChaseTime: 45,
-    flashRange: 18, maxBattery: 100, batteryDrain: 4,
-    fogColor: 0x08080e, fogDensity: 0.055,
+    flashRange: 18, maxBattery: 100, batteryDrain: 0.083,
+    fogColor: 0x0c0c14, fogDensity: 0.018,
     cameraFar: 38,
     doorSlamLoudness: 15, doorSlowLoudness: 3,
     // Sound loudness values for hearing system
@@ -323,14 +323,14 @@ class LevelBuilder {
 
     placeDoors() {
         const doorDefs = [
-            { gx: 20, gz: 10, axis: 'x', id: 'door_ca', locked: true, keyNeeded: 'fuse' }, // Power gate
-            { gx: 28, gz: 10, axis: 'x', id: 'door_cb' },
-            { gx: 39, gz: 22, axis: 'z', id: 'door_lib' },
-            { gx: 39, gz: 27, axis: 'z', id: 'door_kit', locked: true, keyNeeded: 'bolt_cutters' }, // Chain gate
-            { gx: 19, gz: 38, axis: 'x', id: 'door_chapel' },
-            { gx: 28, gz: 38, axis: 'x', id: 'door_dining' },
-            { gx: 9, gz: 22, axis: 'z', id: 'door_storage' },
-            { gx: 9, gz: 27, axis: 'z', id: 'door_cellar', locked: true, keyNeeded: 'master_key' }, // Final exit
+            { gx: 22, gz: 10, axis: 'z', id: 'door_ca', locked: true, keyNeeded: 'fuse' }, // Power gate
+            { gx: 27, gz: 10, axis: 'z', id: 'door_cb' },
+            { gx: 39, gz: 22, axis: 'x', id: 'door_lib' },
+            { gx: 39, gz: 27, axis: 'x', id: 'door_kit', locked: true, keyNeeded: 'bolt_cutters' }, // Chain gate
+            { gx: 18, gz: 38, axis: 'z', id: 'door_chapel' },
+            { gx: 27, gz: 38, axis: 'z', id: 'door_dining' },
+            { gx: 9, gz: 22, axis: 'x', id: 'door_storage' },
+            { gx: 9, gz: 27, axis: 'x', id: 'door_cellar', locked: true, keyNeeded: 'master_key' }, // Final exit
         ];
         for (const d of doorDefs) {
             const { x, z } = gridToWorld(d.gx, d.gz);
@@ -456,17 +456,17 @@ class LevelBuilder {
     }
 
     addLights() {
-        this.scene.add(new THREE.AmbientLight(0x201820, 0.8));
+        this.scene.add(new THREE.AmbientLight(0x302830, 1.5));
         const lps = [
-            { gx: 25, gz: 25, color: 0x887766, intensity: 1.2 }, { gx: 25, gz: 14, color: 0x665544, intensity: 0.8 },
-            { gx: 25, gz: 36, color: 0x665544, intensity: 0.8 }, { gx: 36, gz: 25, color: 0x665544, intensity: 0.8 },
-            { gx: 14, gz: 25, color: 0x665544, intensity: 0.8 }, { gx: 15, gz: 10, color: 0x887766, intensity: 1.0 },
-            { gx: 35, gz: 10, color: 0x887766, intensity: 1.0 }, { gx: 40, gz: 19, color: 0x667788, intensity: 1.0 },
-            { gx: 39, gz: 31, color: 0x887766, intensity: 0.8 }, { gx: 13, gz: 40, color: 0x884444, intensity: 1.0 },
-            { gx: 35, gz: 39, color: 0x887766, intensity: 0.8 }, { gx: 6, gz: 19, color: 0x667755, intensity: 0.8 },
-            { gx: 6, gz: 31, color: 0x556688, intensity: 0.9 },
+            { gx: 25, gz: 25, color: 0x998877, intensity: 2.0 }, { gx: 25, gz: 14, color: 0x887766, intensity: 1.4 },
+            { gx: 25, gz: 36, color: 0x887766, intensity: 1.4 }, { gx: 36, gz: 25, color: 0x887766, intensity: 1.4 },
+            { gx: 14, gz: 25, color: 0x887766, intensity: 1.4 }, { gx: 15, gz: 10, color: 0x998877, intensity: 1.6 },
+            { gx: 35, gz: 10, color: 0x998877, intensity: 1.6 }, { gx: 40, gz: 19, color: 0x778899, intensity: 1.6 },
+            { gx: 39, gz: 31, color: 0x998877, intensity: 1.4 }, { gx: 13, gz: 40, color: 0x995555, intensity: 1.6 },
+            { gx: 35, gz: 39, color: 0x998877, intensity: 1.4 }, { gx: 6, gz: 19, color: 0x778866, intensity: 1.4 },
+            { gx: 6, gz: 31, color: 0x667799, intensity: 1.5 },
         ];
-        for (const lp of lps) { const { x, z } = gridToWorld(lp.gx, lp.gz); const l = new THREE.PointLight(lp.color, lp.intensity, 22); l.position.set(x, CFG.wallH - 0.3, z); this.scene.add(l); }
+        for (const lp of lps) { const { x, z } = gridToWorld(lp.gx, lp.gz); const l = new THREE.PointLight(lp.color, lp.intensity, 28); l.position.set(x, CFG.wallH - 0.3, z); this.scene.add(l); }
     }
 }
 
@@ -1174,15 +1174,23 @@ class AudioManager {
         const breathFilter = this.ctx.createBiquadFilter(); breathFilter.type = 'bandpass'; breathFilter.frequency.value = 400; breathFilter.Q.value = 2;
         breathOsc.connect(breathFilter); breathFilter.connect(this.breathingGain); breathOsc.start();
 
-        // Chase music layer (tension > 0.6)
+        // Chase music layer (tension > 0.6) - dissonant strings/stinger
         this.chaseMusicGain = this.ctx.createGain();
         this.chaseMusicGain.gain.value = 0;
         this.chaseMusicGain.connect(this.masterGain);
-        const co = this.ctx.createOscillator(); co.type = 'sawtooth'; co.frequency.value = 55;
-        co.connect(this.chaseMusicGain); co.start();
-        const co2 = this.ctx.createOscillator(); co2.type = 'square'; co2.frequency.value = 110;
-        const cg2 = this.ctx.createGain(); cg2.gain.value = 0.3;
-        co2.connect(cg2); cg2.connect(this.chaseMusicGain); co2.start();
+        // Tremolo string cluster (E2, Bb2, E3 - tritone dissonance)
+        const chaseFilter = this.ctx.createBiquadFilter();
+        chaseFilter.type = 'lowpass'; chaseFilter.frequency.value = 800; chaseFilter.Q.value = 2;
+        chaseFilter.connect(this.chaseMusicGain);
+        for (const freq of [82.4, 116.5, 165]) {
+            const o = this.ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = freq;
+            const g = this.ctx.createGain(); g.gain.value = 0.08;
+            // Tremolo LFO for urgency
+            const trem = this.ctx.createOscillator(); trem.frequency.value = 6 + Math.random() * 2;
+            const tremG = this.ctx.createGain(); tremG.gain.value = 0.04;
+            trem.connect(tremG); tremG.connect(g.gain); trem.start();
+            o.connect(g); g.connect(chaseFilter); o.start();
+        }
 
         // Environmental creaks (low tension only)
         this.creakGain = this.ctx.createGain();
@@ -1276,35 +1284,57 @@ class AudioManager {
     playFootstep(sprinting) {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        const osc = this.ctx.createOscillator(); osc.type = 'triangle';
-        osc.frequency.value = sprinting ? 60 + Math.random() * 30 : 70 + Math.random() * 25;
+        const dur = sprinting ? 0.10 : 0.12;
+        const vol = sprinting ? 0.18 : 0.10;
+        // Noise burst through lowpass filter = concrete/stone footstep
+        const bufLen = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+        const src = this.ctx.createBufferSource(); src.buffer = buf;
+        const filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass';
+        filter.frequency.value = sprinting ? 600 + Math.random() * 200 : 400 + Math.random() * 150;
+        filter.Q.value = 0.8;
         const gain = this.ctx.createGain();
-        const vol = sprinting ? 0.12 : 0.07;
-        gain.gain.setValueAtTime(vol, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-        osc.connect(gain); gain.connect(this.masterGain); osc.start(now); osc.stop(now + 0.15);
-        const click = this.ctx.createOscillator(); click.type = 'square';
-        click.frequency.value = 800 + Math.random() * 400;
-        const cGain = this.ctx.createGain();
-        cGain.gain.setValueAtTime(0.02, now); cGain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
-        click.connect(cGain); cGain.connect(this.masterGain); click.start(now); click.stop(now + 0.04);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        src.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+        src.start(now); src.stop(now + dur);
+        // Subtle heel impact
+        const thud = this.ctx.createOscillator(); thud.type = 'sine';
+        thud.frequency.value = 50 + Math.random() * 20;
+        const tGain = this.ctx.createGain();
+        tGain.gain.setValueAtTime(vol * 0.5, now);
+        tGain.gain.exponentialRampToValueAtTime(0.001, now + 0.06);
+        thud.connect(tGain); tGain.connect(this.masterGain); thud.start(now); thud.stop(now + 0.06);
     }
 
     playNunFootstep(distance) {
-        if (!this.ctx || distance > 20) return;
+        if (!this.ctx || distance > 25) return;
         const now = this.ctx.currentTime;
-        const vol = Math.max(0.01, 0.1 * (1 - distance / 20));
-        // Lower, heavier footstep with spatial panning
-        const osc = this.ctx.createOscillator(); osc.type = 'sine';
-        osc.frequency.value = 40 + Math.random() * 15;
+        const vol = Math.max(0.01, 0.15 * (1 - distance / 25));
+        // Heavy shoe on stone - noise burst with low filter
+        const dur = 0.18;
+        const bufLen = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+        const src = this.ctx.createBufferSource(); src.buffer = buf;
+        const filter = this.ctx.createBiquadFilter(); filter.type = 'lowpass';
+        filter.frequency.value = 300 + Math.random() * 100;
+        filter.Q.value = 1.0;
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(vol, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
-        osc.connect(gain); gain.connect(this.masterGain); osc.start(now); osc.stop(now + 0.25);
-        // Click
-        const click = this.ctx.createOscillator(); click.type = 'triangle';
-        click.frequency.value = 200 + Math.random() * 100;
-        const cg = this.ctx.createGain();
-        cg.gain.setValueAtTime(vol * 0.5, now); cg.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        click.connect(cg); cg.connect(this.masterGain); click.start(now); click.stop(now + 0.08);
+        gain.gain.setValueAtTime(vol, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        src.connect(filter); filter.connect(gain); gain.connect(this.masterGain);
+        src.start(now); src.stop(now + dur);
+        // Heavy heel thud
+        const thud = this.ctx.createOscillator(); thud.type = 'sine';
+        thud.frequency.value = 35 + Math.random() * 10;
+        const tGain = this.ctx.createGain();
+        tGain.gain.setValueAtTime(vol * 0.8, now);
+        tGain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        thud.connect(tGain); tGain.connect(this.masterGain); thud.start(now); thud.stop(now + 0.1);
     }
 
     playStab() {
@@ -1380,8 +1410,8 @@ const PS1Shader = {
         tDiffuse: { value: null },
         time: { value: 0.0 },
         resolution: { value: new THREE.Vector2(CFG.renderW, CFG.renderH) },
-        grainIntensity: { value: 0.08 },
-        vignetteStrength: { value: 0.6 },
+        grainIntensity: { value: 0.03 },
+        vignetteStrength: { value: 0.3 },
     },
     vertexShader: `
         varying vec2 vUv;
@@ -1415,7 +1445,7 @@ const PS1Shader = {
             else if (index == 1) threshold = 0.5;
             else if (index == 2) threshold = 0.75;
             else threshold = 0.25;
-            return (threshold - 0.5) / 16.0;
+            return (threshold - 0.5) / 64.0;
         }
 
         void main() {
@@ -1510,6 +1540,8 @@ class Game {
         this.walkPhase = 0;
         this.walkBlend = 0;
         this.cameraTilt = 0;
+        this.shakeTimer = 0;
+        this.deathTilt = 0;
 
         // Death animation
         this.dyingTimer = 0;
@@ -1528,7 +1560,7 @@ class Game {
         const startPos = gridToWorld(25, 25);
         this.camera.position.set(startPos.x, CFG.playerH, startPos.z);
 
-        this.flashlight = new THREE.SpotLight(0xffffcc, 3, CFG.flashRange, Math.PI / 5, 0.4, 0.5);
+        this.flashlight = new THREE.SpotLight(0xffffcc, 5, CFG.flashRange, Math.PI / 5, 0.4, 0.5);
         this.flashlight.visible = false;
         this.camera.add(this.flashlight);
         this.flashlight.position.set(0, 0, 0);
@@ -1599,8 +1631,8 @@ class Game {
         this.audio.playHurt();
         this.audio.playStab();
 
-        // Camera shake
-        this.camera.rotation.z = (Math.random() - 0.5) * 0.15;
+        // Camera shake via position jolt (rotation corrupts PointerLockControls)
+        this.shakeTimer = 0.3;
 
         if (this.health <= 0) {
             this.startDying();
@@ -1623,8 +1655,8 @@ class Game {
         const ease = 1 - Math.pow(1 - t, 3); // cubic ease out
         this.camera.position.y = this.deathCamStartY - ease * (this.deathCamStartY - 0.2);
 
-        // Camera tilts to the side
-        this.camera.rotation.z = ease * 1.2;
+        // Camera tilts to the side (applied during render, not here)
+        this.deathTilt = ease * 1.2;
 
         // Increasing red overlay
         this.ui.damageFlash.style.opacity = (0.3 + ease * 0.5).toString();
@@ -1671,7 +1703,27 @@ class Game {
         // Update shader time for grain animation
         this.elapsedTime += dt;
         this.ps1Pass.uniforms.time.value = this.elapsedTime;
+
+        // Damage shake (position-based, decays over time)
+        let shakeX = 0, shakeY = 0;
+        if (this.shakeTimer > 0) {
+            this.shakeTimer -= dt;
+            const intensity = this.shakeTimer / 0.3;
+            shakeX = (Math.random() - 0.5) * 0.12 * intensity;
+            shakeY = (Math.random() - 0.5) * 0.08 * intensity;
+        }
+
+        // Apply tilt + shake only during render (avoids corrupting PointerLockControls quaternion)
+        const savedQuat = this.camera.quaternion.clone();
+        const savedX = this.camera.position.x, savedY = this.camera.position.y;
+        const totalTilt = this.cameraTilt + this.deathTilt;
+        this.camera.rotateZ(totalTilt);
+        this.camera.position.x += shakeX;
+        this.camera.position.y += shakeY;
         this.composer.render();
+        this.camera.quaternion.copy(savedQuat);
+        this.camera.position.x = savedX;
+        this.camera.position.y = savedY;
     }
 
     updatePlayer(dt) {
@@ -1764,7 +1816,6 @@ class Game {
 
         this.camera.position.y = this.currentCamH + vertBob;
         this.cameraTilt += (tiltSway - this.cameraTilt) * Math.min(1, dt * 12);
-        this.camera.rotation.z = this.cameraTilt;
 
         // Footsteps + sound events
         if (moved) {
