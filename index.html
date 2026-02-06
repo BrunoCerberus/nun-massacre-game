@@ -35,9 +35,9 @@
         #key-display { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
         .key-slot { width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px; opacity: 0.3; transition: opacity 0.3s; }
         .key-slot.collected { opacity: 1; border-color: #aaa; box-shadow: 0 0 8px currentColor; }
-        .key-slot.red { background: #8b0000; color: #f00; }
-        .key-slot.blue { background: #00008b; color: #00f; }
-        .key-slot.green { background: #006400; color: #0f0; }
+        .key-slot.red { background: #8b4400; color: #f80; }
+        .key-slot.blue { background: #444466; color: #88a; }
+        .key-slot.green { background: #6b5a00; color: #cc4; }
         #room-name { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 3px; transition: opacity 0.5s; }
         #interact-prompt { position: absolute; top: 55%; left: 50%; transform: translateX(-50%); font-size: 14px; color: #ccc; text-align: center; transition: opacity 0.3s; opacity: 0; }
         #interact-prompt.visible { opacity: 1; }
@@ -63,8 +63,7 @@
         }
         .close-hint { color: #555; margin-top: 15px; font-size: 13px; }
 
-        #vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40;
-            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%); }
+        #vignette { display: none; /* shader handles vignette now */ }
         #scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 45;
             background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px); }
         #fear-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 42;
@@ -92,14 +91,14 @@
         <p class="subtitle">Click to Start</p>
         <div class="controls">
             WASD - Move | MOUSE - Look | SHIFT - Sprint<br>
-            E - Interact | F - Flashlight
+            CTRL - Crouch | E - Interact | F - Flashlight
         </div>
     </div>
 
     <div id="hud" class="hidden">
         <div id="crosshair"></div>
         <div id="stamina-container"><div id="stamina-bar"></div></div>
-        <div id="key-display">
+        <div id="key-display" title="Fuse | Cutters | Key">
             <div class="key-slot red" id="key-red"></div>
             <div class="key-slot blue" id="key-blue"></div>
             <div class="key-slot green" id="key-green"></div>
@@ -124,7 +123,7 @@
 
     <div id="win-screen" class="overlay hidden">
         <h1>YOU ESCAPED</h1>
-        <p>You found all three keys and escaped the convent.</p>
+        <p>You found the fuse, bolt cutters, and master key... and escaped the convent.</p>
         <p class="retry">Click to play again</p>
     </div>
 
