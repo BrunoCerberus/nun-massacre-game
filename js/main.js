@@ -18,7 +18,7 @@ const CFG = {
     crouchH: 1.0,
     maxStamina: 100, staminaDrain: 9, staminaRegen: 12, crouchStaminaRegen: 20,
     maxHealth: 3,
-    nunPatrolSpd: 1.8, nunInvestigateSpd: 2.2, nunChaseSpd: 3.9, nunSearchSpd: 2.4,
+    nunPatrolSpd: 1.8, nunInvestigateSpd: 2.6, nunChaseSpd: 4.8, nunSearchSpd: 2.4,
     nunSightRange: 14, nunSightAngle: 70 * Math.PI / 180,
     nunStabDist: 2.0, nunAttackCd: 1.8,
     nunHearBaseRadius: 10,
@@ -456,7 +456,7 @@ class LevelBuilder {
     }
 
     addLights() {
-        this.scene.add(new THREE.AmbientLight(0x302830, 1.5));
+        this.scene.add(new THREE.AmbientLight(0x3a3040, 2.0));
         const lps = [
             { gx: 25, gz: 25, color: 0x998877, intensity: 2.0 }, { gx: 25, gz: 14, color: 0x887766, intensity: 1.4 },
             { gx: 25, gz: 36, color: 0x887766, intensity: 1.4 }, { gx: 36, gz: 25, color: 0x887766, intensity: 1.4 },
@@ -576,118 +576,160 @@ class NunEnemy {
 
     createModel() {
         const group = new THREE.Group();
-        const black = new THREE.MeshLambertMaterial({ color: 0x080808 });
-        const skin = new THREE.MeshLambertMaterial({ color: 0xd4b896 });
-        const white = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-        const metal = new THREE.MeshLambertMaterial({ color: 0x888899, emissive: 0x111122 });
+        const black = new THREE.MeshLambertMaterial({ color: 0x050505 });
+        const skin = new THREE.MeshLambertMaterial({ color: 0xb8a080 });
+        const white = new THREE.MeshLambertMaterial({ color: 0xaaaaaa });
+        const metal = new THREE.MeshLambertMaterial({ color: 0xaab0b8, emissive: 0x222233 });
+        const darkSkin = new THREE.MeshLambertMaterial({ color: 0x806858 });
 
-        // Torso
-        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.9, 0.35), black);
-        torso.position.y = 1.35;
+        // Scale factor - nun is ~2.3m tall (towering over player at 1.6m)
+        const S = 1.25;
+
+        // Torso (elongated, gaunt)
+        const torso = new THREE.Mesh(new THREE.BoxGeometry(0.55 * S, 1.1 * S, 0.3 * S), black);
+        torso.position.y = 1.5 * S;
         group.add(torso);
         this.parts.torso = torso;
 
-        // Robe skirt (wider at bottom)
-        const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.45, 1.0, 8), black);
-        skirt.position.y = 0.5;
+        // Robe skirt (long, flowing to ground)
+        const skirt = new THREE.Mesh(new THREE.CylinderGeometry(0.18 * S, 0.5 * S, 1.2 * S, 8), black);
+        skirt.position.y = 0.5 * S;
         group.add(skirt);
         this.parts.skirt = skirt;
 
-        // Head
-        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2, 8, 6), skin);
-        head.position.y = 2.05;
+        // Head (slightly gaunt)
+        const head = new THREE.Mesh(new THREE.SphereGeometry(0.2 * S, 8, 6), darkSkin);
+        head.position.y = 2.25 * S;
+        head.scale.set(1, 1.1, 0.95);
         group.add(head);
         this.parts.head = head;
 
-        // Wimple (white band around face)
-        const wimple = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.18, 0.42), white);
-        wimple.position.y = 2.15;
-        group.add(wimple);
-
-        // Veil (black drape over head and shoulders)
-        const veil = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.4, 0.48), black);
-        veil.position.y = 2.3;
-        group.add(veil);
-
-        // Veil drape down back
-        const veilBack = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.6, 0.15), black);
-        veilBack.position.set(0, 1.95, -0.18);
-        group.add(veilBack);
-
-        // Eyes (glowing red)
+        // Sunken cheeks
         for (let side = -1; side <= 1; side += 2) {
-            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.03, 4, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
-            eye.position.set(side * 0.07, 2.08, 0.17);
-            group.add(eye);
+            const cheek = new THREE.Mesh(new THREE.SphereGeometry(0.06 * S, 6, 4), darkSkin);
+            cheek.position.set(side * 0.12 * S, 2.18 * S, 0.1 * S);
+            cheek.scale.set(1, 1.3, 0.5);
+            group.add(cheek);
         }
 
-        // LEFT ARM (swings during walk)
+        // Wimple (white band around face, stained)
+        const wimple = new THREE.Mesh(new THREE.BoxGeometry(0.5 * S, 0.2 * S, 0.44 * S), white);
+        wimple.position.y = 2.35 * S;
+        group.add(wimple);
+
+        // Veil (tall, pointed, imposing)
+        const veil = new THREE.Mesh(new THREE.ConeGeometry(0.3 * S, 0.6 * S, 4), black);
+        veil.position.y = 2.7 * S;
+        group.add(veil);
+
+        // Veil drape down back (longer)
+        const veilBack = new THREE.Mesh(new THREE.BoxGeometry(0.55 * S, 0.9 * S, 0.15 * S), black);
+        veilBack.position.set(0, 2.0 * S, -0.18 * S);
+        group.add(veilBack);
+
+        // Veil side drapes
+        for (let side = -1; side <= 1; side += 2) {
+            const sideDrape = new THREE.Mesh(new THREE.BoxGeometry(0.08 * S, 0.6 * S, 0.3 * S), black);
+            sideDrape.position.set(side * 0.28 * S, 2.0 * S, -0.05 * S);
+            group.add(sideDrape);
+        }
+
+        // Eyes (glowing red, larger, menacing)
+        for (let side = -1; side <= 1; side += 2) {
+            const eye = new THREE.Mesh(new THREE.SphereGeometry(0.04 * S, 6, 4), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+            eye.position.set(side * 0.08 * S, 2.27 * S, 0.18 * S);
+            group.add(eye);
+            // Dark rings around eyes
+            const ring = new THREE.Mesh(new THREE.RingGeometry(0.04 * S, 0.06 * S, 8), new THREE.MeshBasicMaterial({ color: 0x200000, side: THREE.DoubleSide }));
+            ring.position.set(side * 0.08 * S, 2.27 * S, 0.19 * S);
+            group.add(ring);
+        }
+
+        // Mouth (dark slit)
+        const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.1 * S, 0.02 * S, 0.02 * S), new THREE.MeshBasicMaterial({ color: 0x200000 }));
+        mouth.position.set(0, 2.15 * S, 0.2 * S);
+        group.add(mouth);
+
+        // LEFT ARM (long, skeletal)
         const leftArm = new THREE.Group();
-        const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), black);
-        leftUpper.position.y = -0.25;
+        const leftUpper = new THREE.Mesh(new THREE.BoxGeometry(0.12 * S, 0.6 * S, 0.12 * S), black);
+        leftUpper.position.y = -0.3 * S;
         leftArm.add(leftUpper);
-        const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), skin);
-        leftHand.position.y = -0.55;
+        const leftFore = new THREE.Mesh(new THREE.BoxGeometry(0.1 * S, 0.5 * S, 0.1 * S), black);
+        leftFore.position.y = -0.65 * S;
+        leftArm.add(leftFore);
+        const leftHand = new THREE.Mesh(new THREE.BoxGeometry(0.1 * S, 0.12 * S, 0.06 * S), skin);
+        leftHand.position.y = -0.92 * S;
         leftArm.add(leftHand);
-        leftArm.position.set(-0.38, 1.75, 0);
+        leftArm.position.set(-0.38 * S, 1.95 * S, 0);
         group.add(leftArm);
         this.parts.leftArm = leftArm;
 
-        // RIGHT ARM (holds knife)
+        // RIGHT ARM (holds knife, long)
         const rightArm = new THREE.Group();
-        const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.5, 0.15), black);
-        rightUpper.position.y = -0.25;
+        const rightUpper = new THREE.Mesh(new THREE.BoxGeometry(0.12 * S, 0.6 * S, 0.12 * S), black);
+        rightUpper.position.y = -0.3 * S;
         rightArm.add(rightUpper);
-        const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.1), skin);
-        rightHand.position.y = -0.55;
+        const rightFore = new THREE.Mesh(new THREE.BoxGeometry(0.1 * S, 0.5 * S, 0.1 * S), black);
+        rightFore.position.y = -0.65 * S;
+        rightArm.add(rightFore);
+        const rightHand = new THREE.Mesh(new THREE.BoxGeometry(0.1 * S, 0.12 * S, 0.06 * S), skin);
+        rightHand.position.y = -0.92 * S;
         rightArm.add(rightHand);
 
-        // Knife
+        // Knife - long thin blade
         const knifeGroup = new THREE.Group();
-        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.3, 0.08), metal);
-        blade.position.y = -0.15;
+        const blade = new THREE.Mesh(new THREE.BoxGeometry(0.015 * S, 0.4 * S, 0.04 * S), metal);
+        blade.position.y = -0.22 * S;
         knifeGroup.add(blade);
-        const bladeTip = new THREE.Mesh(new THREE.ConeGeometry(0.04, 0.1, 4), metal);
-        bladeTip.position.y = -0.35;
+        // Sharp pointed tip
+        const bladeTip = new THREE.Mesh(new THREE.ConeGeometry(0.02 * S, 0.12 * S, 4), metal);
+        bladeTip.rotation.z = Math.PI; // point downward
+        bladeTip.position.y = -0.48 * S;
         knifeGroup.add(bladeTip);
-        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.12, 0.06), new THREE.MeshLambertMaterial({ color: 0x3a2a1a }));
-        handle.position.y = 0.02;
+        // Guard
+        const guard = new THREE.Mesh(new THREE.BoxGeometry(0.06 * S, 0.02 * S, 0.06 * S), metal);
+        guard.position.y = 0.0;
+        knifeGroup.add(guard);
+        // Handle
+        const handle = new THREE.Mesh(new THREE.BoxGeometry(0.03 * S, 0.14 * S, 0.03 * S), new THREE.MeshLambertMaterial({ color: 0x2a1a0a }));
+        handle.position.y = 0.08 * S;
         knifeGroup.add(handle);
-        knifeGroup.position.y = -0.55;
+        knifeGroup.position.y = -0.95 * S;
         rightArm.add(knifeGroup);
         this.parts.knife = knifeGroup;
 
-        rightArm.position.set(0.38, 1.75, 0);
+        rightArm.position.set(0.38 * S, 1.95 * S, 0);
         group.add(rightArm);
         this.parts.rightArm = rightArm;
 
-        // LEFT LEG
+        // LEFT LEG (hidden under robe)
         const leftLeg = new THREE.Group();
-        const leftThigh = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), black);
-        leftThigh.position.y = -0.25;
+        const leftThigh = new THREE.Mesh(new THREE.BoxGeometry(0.14 * S, 0.5 * S, 0.14 * S), black);
+        leftThigh.position.y = -0.25 * S;
         leftLeg.add(leftThigh);
-        const leftFoot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.2), new THREE.MeshLambertMaterial({ color: 0x1a1a1a }));
-        leftFoot.position.set(0, -0.54, 0.03);
+        const leftFoot = new THREE.Mesh(new THREE.BoxGeometry(0.14 * S, 0.08 * S, 0.22 * S), new THREE.MeshLambertMaterial({ color: 0x0a0a0a }));
+        leftFoot.position.set(0, -0.54 * S, 0.03 * S);
         leftLeg.add(leftFoot);
-        leftLeg.position.set(-0.14, 1.0, 0);
+        leftLeg.position.set(-0.14 * S, 1.0 * S, 0);
         group.add(leftLeg);
         this.parts.leftLeg = leftLeg;
 
         // RIGHT LEG
         const rightLeg = new THREE.Group();
-        const rightThigh = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.5, 0.16), black);
-        rightThigh.position.y = -0.25;
+        const rightThigh = new THREE.Mesh(new THREE.BoxGeometry(0.14 * S, 0.5 * S, 0.14 * S), black);
+        rightThigh.position.y = -0.25 * S;
         rightLeg.add(rightThigh);
-        const rightFoot = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.2), new THREE.MeshLambertMaterial({ color: 0x1a1a1a }));
-        rightFoot.position.set(0, -0.54, 0.03);
+        const rightFoot = new THREE.Mesh(new THREE.BoxGeometry(0.14 * S, 0.08 * S, 0.22 * S), new THREE.MeshLambertMaterial({ color: 0x0a0a0a }));
+        rightFoot.position.set(0, -0.54 * S, 0.03 * S);
         rightLeg.add(rightFoot);
-        rightLeg.position.set(0.14, 1.0, 0);
+        rightLeg.position.set(0.14 * S, 1.0 * S, 0);
         group.add(rightLeg);
         this.parts.rightLeg = rightLeg;
 
-        // Eerie glow
-        const glow = new THREE.PointLight(0xff2200, 0.3, 5);
-        glow.position.y = 2.2;
+        // Eerie glow (stronger, redder)
+        const glow = new THREE.PointLight(0xff1100, 0.5, 8);
+        glow.position.y = 2.5 * S;
         group.add(glow);
 
         return group;
@@ -743,7 +785,7 @@ class NunEnemy {
         this.parts.torso.rotation.z = Math.sin(this.walkCycle) * 0.03;
 
         // Head slight bob
-        this.parts.head.position.y = 2.05 + Math.abs(Math.sin(this.walkCycle)) * 0.02;
+        this.parts.head.position.y = 2.25 * 1.25 + Math.abs(Math.sin(this.walkCycle)) * 0.025;
     }
 
     startStab() {
@@ -1352,12 +1394,36 @@ class AudioManager {
     playHurt() {
         if (!this.ctx) return;
         const now = this.ctx.currentTime;
-        for (let i = 0; i < 3; i++) {
-            const osc = this.ctx.createOscillator(); osc.type = 'sawtooth';
-            osc.frequency.value = 120 + Math.random() * 60;
-            const gain = this.ctx.createGain(); gain.gain.setValueAtTime(0.1, now + i * 0.05); gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.05 + 0.15);
-            osc.connect(gain); gain.connect(this.masterGain); osc.start(now + i * 0.05); osc.stop(now + i * 0.05 + 0.15);
-        }
+        const dur = 0.6;
+        // Scream: noise burst shaped like a vocal cry (rising then falling pitch)
+        const bufLen = Math.floor(this.ctx.sampleRate * dur);
+        const buf = this.ctx.createBuffer(1, bufLen, this.ctx.sampleRate);
+        const data = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1;
+        const src = this.ctx.createBufferSource(); src.buffer = buf;
+        // Bandpass to shape it like a voice
+        const bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass';
+        bp.frequency.setValueAtTime(600, now);
+        bp.frequency.linearRampToValueAtTime(1200, now + 0.08); // rising scream
+        bp.frequency.linearRampToValueAtTime(800, now + dur); // trails off
+        bp.Q.value = 4;
+        // Second formant for realism
+        const bp2 = this.ctx.createBiquadFilter(); bp2.type = 'bandpass';
+        bp2.frequency.value = 2200; bp2.Q.value = 3;
+        const g2 = this.ctx.createGain(); g2.gain.value = 0.3;
+        // Envelope: sharp attack, sustain, decay
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.25, now + 0.03);
+        gain.gain.setValueAtTime(0.2, now + 0.15);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+        src.connect(bp); bp.connect(gain);
+        // Second formant path
+        const src2 = this.ctx.createBufferSource(); src2.buffer = buf;
+        src2.connect(bp2); bp2.connect(g2); g2.connect(gain);
+        gain.connect(this.masterGain);
+        src.start(now); src.stop(now + dur);
+        src2.start(now); src2.stop(now + dur);
     }
 
     playDoorOpen() {
