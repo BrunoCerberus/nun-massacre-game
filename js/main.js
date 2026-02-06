@@ -18,7 +18,7 @@ const CFG = {
     crouchH: 1.0,
     maxStamina: 100, staminaDrain: 9, staminaRegen: 12, crouchStaminaRegen: 20,
     maxHealth: 3,
-    nunPatrolSpd: 1.8, nunInvestigateSpd: 2.6, nunChaseSpd: 4.8, nunSearchSpd: 2.4,
+    nunPatrolSpd: 1.8, nunInvestigateSpd: 2.6, nunChaseSpd: 3.2, nunSearchSpd: 2.4,
     nunSightRange: 14, nunSightAngle: 70 * Math.PI / 180,
     nunStabDist: 2.0, nunAttackCd: 1.8,
     nunHearBaseRadius: 10,
@@ -77,6 +77,24 @@ function generateMap() {
     carve(35, 22, 1, 2, 2);  // Vent: East corridor shortcut
     carve(18, 43, 1, 2, 2);  // Vent: Chapel area to basement
     carve(30, 35, 1, 2, 2);  // Vent: South corridor to Dining area
+
+    // Doorframes: wall off cells adjacent to door positions to create 1-cell-wide doorways
+    // Door at (22,10) axis z - Classroom A entrance: wall above/below
+    m[9][22] = 0; m[11][22] = 0;
+    // Door at (27,10) axis z - Classroom B entrance: wall above/below
+    m[9][27] = 0; m[11][27] = 0;
+    // Door at (39,22) axis x - Library entrance: wall left/right
+    m[22][38] = 0; m[22][40] = 0;
+    // Door at (39,27) axis x - Kitchen entrance: wall left/right
+    m[27][38] = 0; m[27][40] = 0;
+    // Door at (18,38) axis z - Chapel entrance: wall above/below
+    m[37][18] = 0; m[39][18] = 0;
+    // Door at (27,38) axis z - Dining entrance: wall above/below
+    m[37][27] = 0; m[39][27] = 0;
+    // Door at (9,22) axis x - Storage entrance: wall left
+    m[22][8] = 0;
+    // Door at (9,27) axis x - Cellar entrance: wall left
+    m[27][8] = 0;
 
     return m;
 }
