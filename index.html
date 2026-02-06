@@ -71,6 +71,13 @@
             background: radial-gradient(ellipse at center, transparent 60%, rgba(80,0,0,0.4) 100%); opacity: 0; transition: opacity 0.5s; }
 
         #minimap { position: absolute; top: 20px; left: 20px; width: 120px; height: 120px; border: 1px solid #333; opacity: 0.6; }
+
+        #health-display { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; }
+        .health-pip { width: 22px; height: 22px; background: #8b0000; border: 2px solid #cc3333; border-radius: 2px;
+            box-shadow: 0 0 6px rgba(255,0,0,0.4); transition: opacity 0.3s, transform 0.3s; }
+        .health-pip.lost { opacity: 0.15; border-color: #333; box-shadow: none; transform: scale(0.8); }
+        #damage-flash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 43;
+            background: rgba(180,0,0,0.5); opacity: 0; transition: opacity 0.1s; }
     </style>
 </head>
 <body>
@@ -78,6 +85,7 @@
     <div id="vignette"></div>
     <div id="scanlines"></div>
     <div id="fear-overlay"></div>
+    <div id="damage-flash"></div>
 
     <div id="title-screen" class="overlay">
         <h1>NUN MASSACRE</h1>
@@ -95,6 +103,11 @@
             <div class="key-slot red" id="key-red"></div>
             <div class="key-slot blue" id="key-blue"></div>
             <div class="key-slot green" id="key-green"></div>
+        </div>
+        <div id="health-display">
+            <div class="health-pip" id="hp1"></div>
+            <div class="health-pip" id="hp2"></div>
+            <div class="health-pip" id="hp3"></div>
         </div>
         <div id="room-name"></div>
         <div id="interact-prompt"></div>
