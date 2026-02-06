@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NUN MASSACRE</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #fff; }
+        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; image-rendering: crisp-edges; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        .hidden { display: none !important; }
+
+        #title-screen { background: #000; }
+        #title-screen h1 {
+            font-family: 'Special Elite', serif; font-size: 72px; color: #8b0000;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #8b0000; letter-spacing: 8px;
+            animation: flicker 4s infinite;
+        }
+        @keyframes flicker {
+            0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.2} 94%{opacity:1} 96%{opacity:.4} 97%{opacity:1}
+        }
+        #title-screen .subtitle { color: #666; margin-top: 30px; font-size: 18px; animation: pulse 2s infinite; cursor: pointer; }
+        @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+        #title-screen .controls {
+            margin-top: 50px; color: #444; font-size: 13px; text-align: center; line-height: 2.2;
+        }
+
+        #hud { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+        #crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: 4px; height: 4px; background: rgba(255,255,255,0.4); border-radius: 50%; }
+        #stamina-container { position: absolute; bottom: 20px; left: 20px; width: 150px; height: 6px; background: #222; border: 1px solid #555; }
+        #stamina-bar { width: 100%; height: 100%; background: #5a5; transition: width 0.1s, background-color 0.3s; }
+        #stamina-bar.low { background: #a55; }
+        #key-display { position: absolute; top: 20px; right: 20px; display: flex; gap: 8px; }
+        .key-slot { width: 20px; height: 20px; border: 2px solid #333; border-radius: 3px; opacity: 0.3; transition: opacity 0.3s; }
+        .key-slot.collected { opacity: 1; border-color: #aaa; box-shadow: 0 0 8px currentColor; }
+        .key-slot.red { background: #8b0000; color: #f00; }
+        .key-slot.blue { background: #00008b; color: #00f; }
+        .key-slot.green { background: #006400; color: #0f0; }
+        #room-name { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); font-size: 12px; color: #555; text-transform: uppercase; letter-spacing: 3px; transition: opacity 0.5s; }
+        #interact-prompt { position: absolute; top: 55%; left: 50%; transform: translateX(-50%); font-size: 14px; color: #ccc; text-align: center; transition: opacity 0.3s; opacity: 0; }
+        #interact-prompt.visible { opacity: 1; }
+        #flashlight-ui { position: absolute; bottom: 20px; right: 20px; font-size: 11px; color: #555; }
+        #battery-bar-container { width: 60px; height: 4px; background: #222; border: 1px solid #444; margin-top: 3px; }
+        #battery-bar { width: 100%; height: 100%; background: #aa5; transition: width 0.2s; }
+        #message-display { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); font-size: 16px; color: #c00; text-align: center; opacity: 0; transition: opacity 0.5s; pointer-events: none; }
+
+        #death-screen { background: rgba(60,0,0,0.95); }
+        #death-screen h1 { font-family: 'Special Elite', serif; font-size: 80px; color: #ff0000; text-shadow: 0 0 30px #ff0000; }
+        #death-screen p { color: #aaa; margin-top: 20px; }
+        #death-screen .retry { color: #666; margin-top: 40px; cursor: pointer; animation: pulse 2s infinite; }
+
+        #win-screen { background: rgba(0,0,0,0.95); }
+        #win-screen h1 { font-family: 'Special Elite', serif; font-size: 64px; color: #4a9; text-shadow: 0 0 20px #4a9; }
+        #win-screen p { color: #666; margin-top: 20px; }
+        #win-screen .retry { color: #555; margin-top: 40px; cursor: pointer; animation: pulse 2s infinite; }
+
+        #note-screen { background: rgba(0,0,0,0.85); }
+        .note-content {
+            max-width: 450px; padding: 35px; background: #2a2218; border: 2px solid #4a3728;
+            font-family: 'Special Elite', serif; font-size: 15px; line-height: 1.9; color: #c9b896;
+        }
+        .close-hint { color: #555; margin-top: 15px; font-size: 13px; }
+
+        #vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.8) 100%); }
+        #scanlines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 45;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.12) 0px, rgba(0,0,0,0.12) 1px, transparent 1px, transparent 3px); }
+        #fear-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 42;
+            background: radial-gradient(ellipse at center, transparent 60%, rgba(80,0,0,0.4) 100%); opacity: 0; transition: opacity 0.5s; }
+
+        #minimap { position: absolute; top: 20px; left: 20px; width: 120px; height: 120px; border: 1px solid #333; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <canvas id="game-canvas"></canvas>
+    <div id="vignette"></div>
+    <div id="scanlines"></div>
+    <div id="fear-overlay"></div>
+
+    <div id="title-screen" class="overlay">
+        <h1>NUN MASSACRE</h1>
+        <p class="subtitle">Click to Start</p>
+        <div class="controls">
+            WASD - Move | MOUSE - Look | SHIFT - Sprint<br>
+            E - Interact | F - Flashlight
+        </div>
+    </div>
+
+    <div id="hud" class="hidden">
+        <div id="crosshair"></div>
+        <div id="stamina-container"><div id="stamina-bar"></div></div>
+        <div id="key-display">
+            <div class="key-slot red" id="key-red"></div>
+            <div class="key-slot blue" id="key-blue"></div>
+            <div class="key-slot green" id="key-green"></div>
+        </div>
+        <div id="room-name"></div>
+        <div id="interact-prompt"></div>
+        <div id="flashlight-ui">FLASHLIGHT [F]<div id="battery-bar-container"><div id="battery-bar"></div></div></div>
+        <canvas id="minimap"></canvas>
+        <div id="message-display"></div>
+    </div>
+
+    <div id="death-screen" class="overlay hidden">
+        <h1>YOU DIED</h1>
+        <p>The nun found you...</p>
+        <p class="retry">Click to try again</p>
+    </div>
+
+    <div id="win-screen" class="overlay hidden">
+        <h1>YOU ESCAPED</h1>
+        <p>You found all three keys and escaped the convent.</p>
+        <p class="retry">Click to play again</p>
+    </div>
+
+    <div id="note-screen" class="overlay hidden">
+        <div class="note-content" id="note-text"></div>
+        <p class="close-hint">Press E to close</p>
+    </div>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
